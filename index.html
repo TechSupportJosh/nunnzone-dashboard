@@ -10,7 +10,12 @@
   h1 { margin: 0; font-size: 22px; }
   #toggle { color: #999; text-decoration: none; font-size: 13px; border: 1px solid #333; border-radius: 4px; padding: 4px 10px; }
   #toggle:hover { color: #fff; }
-  body:not(.editing) .site button, body:not(.editing) form { display: none; }
+  body:not(.editing) .site button, body:not(.editing) .cat h2 button, body:not(.editing) form { display: none; }
+  .cat h2 { display: flex; align-items: center; gap: 4px; }
+  .cat h2 span { flex: 1; }
+  .cat h2 button { background: none; border: 0; color: #777; cursor: pointer; padding: 0 2px; font-size: 13px; }
+  .cat h2 button:hover:not(:disabled) { color: #fff; }
+  .cat h2 button:disabled { opacity: .3; cursor: default; }
   #cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
   .cat { background: #1e2128; border-radius: 8px; padding: 14px; }
   .cat h2 { margin: 0 0 10px; font-size: 16px; color: #8ab4f8; }
@@ -60,12 +65,22 @@ function render() {
   const cats = $('cats');
   cats.innerHTML = '';
   $('catlist').innerHTML = '';
-  data.forEach(c => {
+  data.forEach((c, ci) => {
     $('catlist').append(new Option(c.name));
     const div = document.createElement('div');
     div.className = 'cat';
     const h = document.createElement('h2');
-    h.textContent = c.name;
+    const title = document.createElement('span');
+    title.textContent = c.name;
+    const move = (dir, label, tip) => {
+      const b = document.createElement('button');
+      b.textContent = label; b.title = tip;
+      const to = ci + dir;
+      b.disabled = to < 0 || to >= data.length;
+      b.onclick = () => { [data[ci], data[to]] = [data[to], data[ci]]; save(); };
+      return b;
+    };
+    h.append(title, move(-1, '▲', 'Move up'), move(1, '▼', 'Move down'));
     div.append(h);
     c.sites.forEach((s, i) => {
       const row = document.createElement('div');
